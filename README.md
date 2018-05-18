@@ -118,6 +118,59 @@ Now we can run `ng serve` and then press F5 to run the application.
 
 ![](assets/welcome.png)
 
+### Application-to-ServiceOne-to-ServiceTwo
+We'll just extend the implementation of the services so that `LibOneService` has a dependency on the `LibTwoService` which is contained in the `lib-two` library. We'll inject the service into the constructor of the `LibOneService` and update the `SayHello` method to use the `LibTwoService` instance. Note that the `import` statement is a file path reference to the `public_api` of the `LibTwoService`. 
+
+```typescript
+import { Injectable } from '@angular/core';
+import { LibTwoService } from '../../../lib-two/src/public_api';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LibOneService {
+  constructor(
+    private serviceTwo: LibTwoService
+  ) { }
+
+  SayHello(message: string): string {
+    // return `${message}`;
+    return this.serviceTwo.SayHello(message);
+  }
+}
+```
+Create and implement a `SayHello` method in the `LibTwoService`. 
+
+```typescript
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LibTwoService {
+  serviceName = 'LibTwoService';
+  constructor() { }
+
+  SayHello(message: string): string {
+    return `${message} from ${this.serviceName}`;
+  }
+}
+```
+
+Serve and launch the application to view the usage of multiple services by a single application.
+
+```
+ng serve
+```
+
+![](assets/workspace-from-libtwoservice.png)
+
+As you can see, the development workflow is much different and really efficient. There is no need to publish the libraries and then install/update them for use in an application.
+
+* more efficient development workflow
+* ability to share libraries from application consumers
+* ability for libraries to consume other libraries in the workspace
+
 ## Angular 6 Workspace Test Drive
 I want to test-drive the new Angular project workspace and kick the tires a little. And, also compare it to NRWL.io's Nx workspace. The following are my expectations:
 
