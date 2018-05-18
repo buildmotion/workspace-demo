@@ -2,6 +2,8 @@
  ## All The Cool Cats are Using Workspaces Now.
 ![](assets/cool-cat-with-sunglasses.jpg)
 
+**Github.com**: [https://github.com/buildmotion/workspace-demo](https://github.com/buildmotion/workspace-demo)
+
 The most recent version of Angular is a significant release - version 6.0.3 as of this post. We get a lot of new tools and features that help us have a more efficient develoment environment. 
 
 Now when we use the new CLI, the new default environment is now a workspace (well, maybe not - more later) that allows for the development of multiple applications and libraries in a single workspace. When you add new applications and/or libraries, you are creating ` project ` items. A project item has a specific type to indicate whether it is an ` application ` or a ` library `. 
@@ -122,7 +124,11 @@ Now we can run `ng serve` and then press F5 to run the application.
 
 ![](assets/welcome.png)
 
+That was easy. Now let's try something a little more real world.
+
 ### Application-to-ServiceOne-to-ServiceTwo
+In the real-world, it is not uncommon for a library to use other libraries. It is all about reuse. Our packages that we install from NPM have dependencies on other packages. We can also do the same with our shared libraries. 
+
 We'll just extend the implementation of the services so that `LibOneService` has a dependency on the `LibTwoService` which is contained in the `lib-two` library. We'll inject the service into the constructor of the `LibOneService` and update the `SayHello` method to use the `LibTwoService` instance. Note that the `import` statement is a file path reference to the `public_api` of the `LibTwoService`. 
 
 ```typescript
