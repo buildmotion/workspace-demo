@@ -1,122 +1,12 @@
  # Test-Drive :: Angular 6 Workspace
- ## The Cool Cats are Using Workspaces Now.
 ![](assets/cool-cat-with-sunglasses.jpg)
 
-The most recent version of Angular is a significant release - version 6.0.3 as of this post. The default environment is now a workspace (well, maybe not - more later) that allows for the development of multiple applications and libraries in a single workspace. When you add new applications and/or libraries, you are creating ` project ` items. A project item has a specific type to indicate whether it is an ` application ` or a ` library `. 
+The most recent version of Angular is a significant release. The default environment is now a workspace (well, maybe not - more later) that allows for the development of multiple applications and libraries in a single workspace. When you add new applications and/or libraries, you are creating ` project ` items. A project item has a specific type to indicate whether it is an ` application ` or a ` library `. 
 
         application: is a single-page web application.
         library: is a module that is shared by multiple applications
 
-The workspace tooling for Angular development was introduced by NRWL.io's Nx toolset. A package with a set of schematics that allow you to create a ` workspace ` using custom configuration provided by NRWL. If you use Nx, you create ` apps ` that is either a ` lib ` or an ` app ` (Angular Single Page Web application). It seems like I just started using NRWL's Nx Workspace. I'm wondering what the future will be for Nx - because the features are similar.
-
-## Uses for an Angular Workspace
-I am going to assume the default use of the new Angular Workspace is to support the ability to share Angular libraries amongst multiple web applications.  The previous Angular CLI allows us to create an ` @NgModule ` within a web application with the following command. 
-
-```
-ng generate module MyNewModule
-```
-
-The new Angular 6 CLI will you to create an Angular library, which is really an ` @NgModule `, outside of the specified web application.
-
-```
-ng generate library MyNewLibrary
-```
-
-So, what is the difference between a ` module ` and a ` library `? If the module can be used by more than one consumer (i.e., Angular web applications or other modules) it can be considered a library.
-
-So, what is the difference between a ` library ` and a ` package `? I'll assume if the module is published to a repository for consumption via a package manager (think NPM) that it is a package. However, many recent blog posts and community-speak is referring to these as libraries. The remainder of this article will refer to published or non-published items as libraries. 
-
-### Non-Published Libraries
-The current implementation of the Angular Workspace is for developing multiple web appications sharing libraries in a single development environment. It is using a MonoRepo approach to development. A MonoRepo simplifies the development workflow and provides an early integration of shared libraries with any application consumers.
-
-The current implementation of the the Angular Workspace is **NOT** a development environment (by default) for creating libraries to be published on NPM. Although the environment can use `ng-packagr` to build and output a library project to a `dist` folder completely ready for publishing - it is not the default intended use of the workspace environment. In fact, when you run the default build script, only the default application is output to the `dist` folder.
-
-Publishing packages to NPM requires additional management of the ` peerDependencies ` in the library's package.json file. This is not done by default during the build process of libraries or applications in the new workspace. You will need to manually set these dependencies. Additionally, NPM requires semantic versioning of the published libraries. When you run the build script for the workspace, the default web application is compiled and output to the `dist` folder. 
-
-There is no build or output of the library projects in the `dist` folder. To accomplish a distribution build of the libraries, you will need to add a new build script to the package.json file. You will also want to update the version of your package before creating a distribution build for publishing.
-
-```
-"package": "ng build --project=libOne && ng build --project=libTwo",
-```
-
-Run the script to build the libraries with the output going to the `dist` folder.
-
-```
-npm run package
-```
-
-Building and outputting the libraries to the `dist` folder is really only for publishing packages (libraries) to NPM. None of the applications are using or importing these packages from the local `dist` folder. 
-
-### workspace-demo
-I'm creating a `workspace-demo` workspace available on Github to show the basic usage of a development workflow for multiple libraries and applications. The default workspace contains a default web application. Therefore, to demonstrate the multiple libraries, I'll add (2) new library projects to the workspace uskng the CLI. 
-
-```
-ng generate library libOne
-ng generate library libTwo
-```
-
-### Using a Library
-As I add the service to the constructor of the `AppComponent`, the editor will add the import statement to the `LibOneService`. Notice that the right-side of the import is using a filepath reference to the `public_api` of the specified library - there is no package name usage here. 
-
-A simplified developer workflow here does not require us to add an entry in the `dependencies` section of the `package.json`. The library is not published and is not contained in the `node_modules` folder as most packages are. Remember that these are shared libraries in a workspace environment. 
-
-```typescript
-import { Component } from '@angular/core';
-import { LibOneService } from 'projects/lib-one/src/public_api';
-
-@Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
-})
-export class AppComponent {
-  title = 'app';
-
-  constructor(
-    private oneService: LibOneService
-  ) {
-    this.title = this.oneService.SayHello("Angular 6 Workspace")
-  }
-}
-```
-
-The service will have a simple `SayHello` method - we just want to see how things work here. 
-
-```typescript
-import { Injectable } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class LibOneService {
-  constructor() { }
-
-  SayHello(message: string): string {
-    return `${message}`;
-  }
-}
-```
-
-I'll update the `launch.json` to add a configuration to use localhost and port 4200.
-
-```json
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:4200",
-            "webRoot": "${workspaceFolder}"
-        }
-    ]
-}
-```
-
-Now we can run `ng serve` and then press F5 to run the application.
-
-![](assets/welcome.png)
+The workspace tooling for Angular development was introduced by NRWL.io's Nx toolset. A package with a set of extensions/schematics that allow you to create a ` workspace ` using custom configuration provided by NRWL. If you use Nx, you create ` apps ` that is either a ` lib ` or an ` app ` (Angular Single Page Web application). 
 
 ## Angular 6 Workspace Test Drive
 I want to test-drive the new Angular project workspace and kick the tires a little. And, also compare it to NRWL.io's Nx workspace. The following are my expectations:
