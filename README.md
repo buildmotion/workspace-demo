@@ -1,13 +1,17 @@
- # Test-Drive :: Angular 6 Workspace
- ## The Cool Cats are Using Workspaces Now.
+ # Angular 6 Workspace :: Test-Drive
+ ## All The Cool Cats are Using Workspaces Now.
 ![](assets/cool-cat-with-sunglasses.jpg)
 
-The most recent version of Angular is a significant release - version 6.0.3 as of this post. The default environment is now a workspace (well, maybe not - more later) that allows for the development of multiple applications and libraries in a single workspace. When you add new applications and/or libraries, you are creating ` project ` items. A project item has a specific type to indicate whether it is an ` application ` or a ` library `. 
+The most recent version of Angular is a significant release - version 6.0.3 as of this post. We get a lot of new tools and features that help us have a more efficient develoment environment. 
+
+Now when we use the new CLI, the new default environment is now a workspace (well, maybe not - more later) that allows for the development of multiple applications and libraries in a single workspace. When you add new applications and/or libraries, you are creating ` project ` items. A project item has a specific type to indicate whether it is an ` application ` or a ` library `. 
 
         application: is a single-page web application.
         library: is a module that is shared by multiple applications
 
-The workspace tooling for Angular development was introduced by NRWL.io's Nx toolset. A package with a set of schematics that allow you to create a ` workspace ` using custom configuration provided by NRWL. If you use Nx, you create ` apps ` that is either a ` lib ` or an ` app ` (Angular Single Page Web application). It seems like I just started using NRWL's Nx Workspace. I'm wondering what the future will be for Nx - because the features are similar.
+The workspace tooling for Angular development was introduced awhile back by NRWL.io's Nx toolset. A package with a set of schematics that allow you to create a ` workspace ` using custom configuration provided by NRWL. If you use Nx, you create ` apps ` that is either a ` lib ` or an ` app ` (Angular Single Page Web application). It seems like I just started using NRWL's Nx Workspace. I'm wondering what the future will be for Nx - because the features are similar. 
+
+Being able to reuse libraries across multiple applications is a great feature. It was definitely possible before. However, the workflow was much more intensive and required lots of configuration of the libraries. It is now much easier with version 6 of the Angular CLI.
 
 ## Uses for an Angular Workspace
 I am going to assume the default use of the new Angular Workspace is to support the ability to share Angular libraries amongst multiple web applications.  The previous Angular CLI allows us to create an ` @NgModule ` within a web application with the following command. 
@@ -16,24 +20,24 @@ I am going to assume the default use of the new Angular Workspace is to support 
 ng generate module MyNewModule
 ```
 
-The new Angular 6 CLI will you to create an Angular library, which is really an ` @NgModule `, outside of the specified web application.
+The new Angular 6 CLI will you to create an Angular library, which is really an ` @NgModule `, outside of the specified web application. Since we have this new capability, we have more options. Now we have to decide which modules are candidates for reuse and sharing verses which ones should be contained in the specified application. My opinion is that modules are great way to organize your code and applications. They provide encapsulation and support many good programming principles. Organizing related things into a single module provides many benefits. Now, if that module is a candidate for reuse by other applications - we can now create it as a library in the new workspace. Think of it as an additional code organziation strategy. Use the following to create a new library.
 
 ```
 ng generate library MyNewLibrary
 ```
 
-So, what is the difference between a ` module ` and a ` library `? If the module can be used by more than one consumer (i.e., Angular web applications or other modules) it can be considered a library.
+So, what is the difference between a ` module ` and a ` library `? If the module can be used by more than one consumer (i.e., Angular web applications or other modules) it can be considered a library. A module describes the ability or mechanism to group related things. And a library indicates that it contains things that are useful to consumers of the library - think of a real physical library where you can visit and checkout items for your enjoyment. Now your library can be shared by many consumers - kind of like a book in the library.
 
-So, what is the difference between a ` library ` and a ` package `? I'll assume if the module is published to a repository for consumption via a package manager (think NPM) that it is a package. However, many recent blog posts and community-speak is referring to these as libraries. The remainder of this article will refer to published or non-published items as libraries. 
+So, what is the difference between a ` library ` and a ` package `? I'll assume if the module is published to a repository for consumption via a package manager (think NPM) that it is a package. However, many recent blog posts and community-speak is referring to these as libraries. The remainder of this article will refer to published or non-published items as libraries.
 
 ### Non-Published Libraries
 The current implementation of the Angular Workspace is for developing multiple web appications sharing libraries in a single development environment. It is using a MonoRepo approach to development. A MonoRepo simplifies the development workflow and provides an early integration of shared libraries with any application consumers.
 
-The current implementation of the the Angular Workspace is **NOT** a development environment (by default) for creating libraries to be published on NPM. Although the environment can use `ng-packagr` to build and output a library project to a `dist` folder completely ready for publishing - it is not the default intended use of the workspace environment. In fact, when you run the default build script, only the default application is output to the `dist` folder.
+The current implementation of the the Angular Workspace is **NOT** a development environment (by default) for creating libraries to be published on NPM. Although the environment can use `ng-packagr` to build and output a library project to a `dist` folder completely ready for publishing - it is not the default use of the workspace environment. In fact, when you run the default build script, only the default application is output to the `dist` folder.
 
-Publishing packages to NPM requires additional management of the ` peerDependencies ` in the library's package.json file. This is not done by default during the build process of libraries or applications in the new workspace. You will need to manually set these dependencies. Additionally, NPM requires semantic versioning of the published libraries. When you run the build script for the workspace, the default web application is compiled and output to the `dist` folder. 
+Publishing packages to NPM requires additional management of the ` peerDependencies ` in the library's package.json file. This is not done by default during the build process of libraries or applications in the new workspace. You will need to manually set these peer dependencies. Additionally, NPM requires semantic versioning of the published libraries. Before publishing packages to NPM, you will need to update the semantic version of the library. The web applications in the workspace are not concerned with the `package` notion of the library - they are not referenced in the package.json by name/version; and they are not installed in the `node_modules` folder of the workspace. Applications in the worksapce reference libraries by file path as we shall see.
 
-There is no build or output of the library projects in the `dist` folder. To accomplish a distribution build of the libraries, you will need to add a new build script to the package.json file. You will also want to update the version of your package before creating a distribution build for publishing.
+There is no build or output of the library projects in the `dist` folder. To accomplish a distribution build of the libraries, you will need to add a new build script to the package.json file. You will also want to update the version of your package before creating a distribution build for publishing. The following script below shows how to build (2) libraries - this specific build process will use `ng-packagr` to create distribution version of the library: UMD, esm5, esm2015, fesm5, and fesm2015. This special build process follows the Angular Package Format. Nice!
 
 ```
 "package": "ng build --project=libOne && ng build --project=libTwo",
