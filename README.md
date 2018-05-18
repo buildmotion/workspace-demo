@@ -171,7 +171,7 @@ As you can see, the development workflow is much different and really efficient.
 * ability to share libraries from application consumers
 * ability for libraries to consume other libraries in the workspace
 
-## Angular 6 Workspace Test Drive
+# Angular 6 Workspace for Publishing Libraries
 I want to test-drive the new Angular project workspace and kick the tires a little. And, also compare it to NRWL.io's Nx workspace. The following are my expectations:
 
 1. Use a @scope for libraries - to help manage and organize the libraries. For example, `@buildmotion/security` where my scope is `@buildmotion`
