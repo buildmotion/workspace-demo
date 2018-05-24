@@ -4,14 +4,14 @@
 
 **Github.com**: [https://github.com/buildmotion/workspace-demo](https://github.com/buildmotion/workspace-demo)
 
-The most recent version of Angular is a significant release - version 6.0.3 as of this post. We get a lot of new tools and features that help us have a more efficient develoment environment. 
+The most recent version of Angular is a significant release - version 6.0.3 as of this post. We get a lot of new tools and features that provide a more efficient develoment environment. 
 
-Now when we use the new CLI, the new default environment is now a workspace (well, maybe not - more later) that allows for the development of multiple applications and libraries in a single workspace. When you add new applications and/or libraries, you are creating ` project ` items. A project item has a specific type to indicate whether it is an ` application ` or a ` library `. 
+When we use the new Angular 6 CLI, the default environment is now a workspace (well, maybe not - more later) that allows for the development of multiple applications and libraries in a single workspace. When you add new applications and/or libraries, you are creating ` project ` items. A project item has a specific type to indicate whether it is an ` application ` or a ` library `. 
 
         application: is a single-page web application.
         library: is a module that is shared by multiple applications
 
-The workspace tooling for Angular development was introduced awhile back by NRWL.io's Nx toolset. A package with a set of schematics that allow you to create a ` workspace ` using custom configuration provided by NRWL. If you use Nx, you create ` apps ` that is either a ` lib ` or an ` app ` (Angular Single Page Web application). It seems like I just started using NRWL's Nx Workspace. I'm wondering what the future will be for Nx - because the features are similar. 
+The workspace tooling for Angular development was introduced awhile back by NRWL.io's Nx extensions. A set of schematics that allow you to create a ` workspace ` using custom configuration provided by NRWL. If you use Nx, you create ` apps ` that are either a ` lib ` or an ` app ` (Angular Single Page Web application). It seems like I just started using NRWL's Nx Workspace 1.0 - on May 22, 2018 NRWL announced the release of version 6.0 built on top of Angular CLI 6.0. The tooling for creating and using libraries is moving pretty fast these days. 
 
 Being able to reuse libraries across multiple applications is a great feature. It was definitely possible before. However, the workflow was much more intensive and required lots of configuration of the libraries. It is now much easier with version 6 of the Angular CLI.
 
@@ -33,13 +33,11 @@ So, what is the difference between a ` module ` and a ` library `? If the module
 So, what is the difference between a ` library ` and a ` package `? I'll assume if the module is published to a repository for consumption via a package manager (think NPM) that it is a package. However, many recent blog posts and community-speak is referring to these as libraries. The remainder of this article will refer to published or non-published items as libraries.
 
 ### Non-Published Libraries
-The current implementation of the Angular Workspace is for developing multiple web appications sharing libraries in a single development environment. It is using a MonoRepo approach to development. A MonoRepo simplifies the development workflow and provides an early integration of shared libraries with any application consumers.
+The current implementation of the Angular Workspace is for developing multiple web appications sharing libraries in a single development environment. The current implementation of the the Angular Workspace is **NOT** a development environment (by default) for creating libraries to be published on NPM. Although the environment can use `ng-packagr` to build and output a library project to a `dist` folder completely ready for publishing - it is not the default use of the workspace environment. In fact, when you run the default build script, only the default application is output to the `dist` folder. The build strategy is application-centric. It will build the applications and include any other modules referenced and used by the specified application. 
 
-The current implementation of the the Angular Workspace is **NOT** a development environment (by default) for creating libraries to be published on NPM. Although the environment can use `ng-packagr` to build and output a library project to a `dist` folder completely ready for publishing - it is not the default use of the workspace environment. In fact, when you run the default build script, only the default application is output to the `dist` folder.
+Publishing packages is a very different workflow. If you want to compile and publish one of the libraries in the new workspace, you can use the Angular CLI command `ng build --project=lib-one`. The new project configuration in the `angular.json` knows that this type of project is `library` it can now use different build strategies for different project types - library projects will use `ng-packagr` to build and create distributable output ready for publishing. NPM requires additional management of the ` peerDependencies ` in the library's package.json file. This is not done by default during the build process of libraries or applications in the new workspace. You will need to manually set these peer dependencies. Additionally, NPM requires semantic versioning of the published libraries. Before publishing packages to NPM, you will need to update the semantic version of the library. The web applications in the workspace are not concerned with the `package` notion of the library - they are not referenced in the package.json by name/version; and they are not installed in the `node_modules` folder of the workspace. Applications in the worksapce reference libraries by file path as we shall see.
 
-Publishing packages to NPM requires additional management of the ` peerDependencies ` in the library's package.json file. This is not done by default during the build process of libraries or applications in the new workspace. You will need to manually set these peer dependencies. Additionally, NPM requires semantic versioning of the published libraries. Before publishing packages to NPM, you will need to update the semantic version of the library. The web applications in the workspace are not concerned with the `package` notion of the library - they are not referenced in the package.json by name/version; and they are not installed in the `node_modules` folder of the workspace. Applications in the worksapce reference libraries by file path as we shall see.
-
-There is no build or output of the library projects in the `dist` folder. To accomplish a distribution build of the libraries, you will need to add a new build script to the package.json file. You will also want to update the version of your package before creating a distribution build for publishing. The following script below shows how to build (2) libraries - this specific build process will use `ng-packagr` to create distribution version of the library: UMD, esm5, esm2015, fesm5, and fesm2015. This special build process follows the Angular Package Format. Nice!
+There is no build or output of the library projects in the `dist` folder when you build an application project. To accomplish a distribution build of the libraries, you will need to add a new build script to the package.json file. You will also want to update the version of your package before creating a distribution build for publishing. The following script below shows how to build (2) libraries - this specific build process will use [ng-packagr](https://www.npmjs.com/package/ng-packagr) to create distribution version of the library for: UMD, esm5, esm2015, fesm5, and fesm2015. This special build process follows the [Angular Package Format](https://goo.gl/jB3GVv). Nice!
 
 ```
 "package": "ng build --project=libOne && ng build --project=libTwo",
@@ -182,6 +180,8 @@ As you can see, the development workflow is much different and really efficient.
 * ability for libraries to consume other libraries in the workspace
 
 # Angular 6 Workspace for Publishing Libraries
+Now we understand how to use the default workspace environment for sharing libraries with applications. The next scenario we want to explore is how can we use the new Angular workspace to publish libraries to NPM.
+
 I want to test-drive the new Angular project workspace and kick the tires a little. And, also compare it to NRWL.io's Nx workspace. The following are my expectations:
 
 1. Use a @scope for libraries - to help manage and organize the libraries. For example, `@buildmotion/security` where my scope is `@buildmotion`
@@ -419,19 +419,19 @@ export class LibOneComponent implements OnInit {
 ```
 
 ## Use the Library in the Application
-Now that we have some components and services in our library we are ready to use them in the application. I can inject the service into the constructor. Visual Studio Code will create the import statement for the component. However, notice that we are not using the `@buildmotion/lib-one` scope and library name. This is disappointing. The NRWL.io Nx workspace does this by default. 
+Now that we have some components and services in our library we are ready to use them in the application. I can inject the service into the constructor. Visual Studio Code will create the import statement for the component. However, notice that we are not using the `@buildmotion/lib-one` scope and library name. This is disappointing. The NRWL.io Nx workspace does this by default. It is not recommended to publish libraries with file path references/imports - the dependency will need to be installed from NPM and will not be in the specified file path.
 
 ```typescript
 import { LibOneService } from 'dist/@buildmotion/lib-one/public_api';
 ```
 
-I would prefer to see:
+I would prefer to see what is below. Because the context of this exercise is to publish libraries that can be consumed by other applications. The consumers of your library may not be applications in the same project workspace. It may be a different team or company if the libraries are public. Keep in mind that we are extending the default use of the Angular 6 workspace environment to allow for publishing libraries for general consumption. You may not need to do this. 
 
 ```typescript
 import { LibOneService } from '@buildmotion/lib-one';
 ```
 
-However, we get a `path` reference to the `LibOneService`. Update the path value to use the scope name value: `@buildmotion/lib-one`. We'll provide a fix next to make this happen.
+However, we get a `path` reference to the `LibOneService`. Update the path value to use the scope name value: `@buildmotion/lib-one`. We'll provide a work-around to make this happen.
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -463,8 +463,6 @@ Update the workspace's root `tsconfig.json` file to include (2) new items for ea
 
 ```json
 "paths": {
-      "libOne": ["dist/libOne"],
-      "libTwo": ["dist/libTwo"],
       "@buildmotion/lib-two":["dist/@buildmotion/lib-two"],
       "@buildmotion/lib-one":["dist/@buildmotion/lib-one"]
     }
@@ -530,59 +528,6 @@ Build the new libaries. You should see the output in the `dist` folder under the
 npm run package
  ```
 
-
-Attempt to build the `LibOne` library. You will see the following error message. I think it should be a core feature that a `library` should be able to reference and use another `package`. It is a basic and fundamental requirement for package/library development. What we have currently in the new Angular Workspace is the ability to add multiple applications and multiple libraries. As long as the dependency direction is from application to library we are all good. However, as soon as we have a library-to-library dependency (which really is package-to-package) this doesn't work. Hopefully, I'm not missing something here. I'll need to investigate further.
-
-For example, if I have a basic logging library, it is reasonable to reuse the logging library in additonal custom libraries that I have in my workspace. 
-
-I get a build error when a library references/uses another library in the project workspace. 
-```
-BUILD ERROR
-Cannot read property 'module' of undefined
-TypeError: Cannot read property 'module' of undefined
-...
-```
-
-## Solution to Sharing Libraries with Other Libraries
-I copied the output of the `dist` folder to `node_modules`. This allowed the import reference to use the @scope and name of the library `LibTwo. To be fair, the NRWL.io Nx workspace has the same issue when building libraries that contain dependencies on other libraries in the same workspace. By default, it is expecting the `package` references as `@buildmotion/security` to be in the `node_modules/@buildmotion/security` folder. I need to determine if there is an alternative with additional configuration to allow the libraries to find their dependencies without having to look in the node_modules folder (i.e., eliminate copying the build output). 
-
-```typescript
-import { Injectable } from '@angular/core';
-import { LibTwoService } from '@buildmotion/lib-two';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class LibOneService {
-
-  
-  constructor(
-    // inject a service from a different module/library;
-    private libTwoService: LibTwoService
-  ) { }
-
-  SayHello(message: string): string {
-    if(message) {
-      // USE A SERVICE FROM ANOTHER LIBRARY
-      this.libTwoService.SayHello(message);
-    }
-    return 'Next time send in a message.';
-  }
-}
-```
-
-Now, we can build `libOne` because it now knows where `libTwo` is located (for now it can be found in the `node_modules/@buildmotion/lib-two` folder. One thing to note is that if your workspace contains libraries with dependencies on other workspace libraries, you will need to build these in the correct dependency sequence.
-
-If there is no other work-around or configuration option, you will need to add a step in the build process to `copy` the output of each library build to the `node_modules` folder. I currently do not like having to do this. But for this quick demo it was the fastest alternative. 
-
-```
-ng build --project=libOne
-```
-
-The `ng-packagr` builds the library project without any errors. This is good news. 
-
-![](assets/build-lib-one.png)
-
 ### Library Peer Dependencies
 If you are going to publish your libraries created in the Angular 6 workspace, you will need to update the `peerDependencies` in the library's `package.json` file. This is what gets published to NPM. When consumers of your library install the package, the `peerDependencies` are listed for the developer to manually install. 
 
@@ -595,9 +540,12 @@ ng serve --project=webOne
 ![](assets/hello-ng-6-workspace.png)
 
 ## Wrapping Up
+The new Angular 6 Workspace is really intended as an enhanced developer workflow to allow multiple applications and libraries to be developed together more efficiently. It is not intended for publishing libraries for general consumption.
 
-1. The workspace environment does not appear to support @scope names and references from consumers of libraries.
-2. The environment supports one-way dependencies from a consumer `application` to one or more `library` projects. 
-3. The environment does not support `library-to-library` dependencies.
-4. May not be a good choice for developing libraries that have a primary destination of a package manager repository (think NPM). 
-5. The default `application` is created in the root `src` folder when a new workspace is created. 
+* The workspace environment supports sharing multiple libraries by multiple consuming applications.
+* It is application-centric in the build process. There is no build or output of libraries by default.
+* The workspace environment does not appear to support @scope names and references from consumers of libraries.
+* May not be a good choice for developing libraries that have a primary destination of a package manager repository (think NPM). 
+* The default `application` is created in the root `src` folder when a new workspace is created.
+
+If you want to have the advantage of a workspace environment that provides enhanced configuration of projects and dependencies, along with full-support for publishing libraries; I would suggest using NRWL.io Nx extensions versions 1.0 or 6.0. If you are not publishing your libraries for general consumption, you would do well to use either the Angular or NRWL workspace environments. Both environments provide excellent opportunities to organize your code using modules and this is a good thing!
